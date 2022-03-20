@@ -1,0 +1,19 @@
+{
+  "name": "url-monitor",
+  "version": "1.0.0",
+  "description": "A RESTful API server that allows authenticated users to monitor URLs, and get detailed uptime reports about their availability, average response time, and total uptime/downtime.",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aligredo/url-monitor.git"
+  },
+  "author": "Ali Ahmed (aligredo)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aligredo/url-monitor/issues"
+  },
+  "homepage": "https://github.com/aligredo/url-monitor#readme"
+}
