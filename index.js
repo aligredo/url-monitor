@@ -22,7 +22,7 @@ var urlencodedParser = bodyParser.urlencoded({ extended: true, limit: 1024 * 102
 app.use(jsonParser);
 app.use(urlencodedParser);
 
-
+// Middleware to authenticate user requests using JWT in Authorization header
 app.use(function(req, res, next) {
 	if (req.headers && req.headers.authorization && req.headers.authorization.split(' ')[0] === 'JWT') {
 	  jwt.verify(req.headers.authorization.split(' ')[1], SECRET, function(err, decode) {

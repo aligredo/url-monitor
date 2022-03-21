@@ -10,5 +10,5 @@ module.exports = function(app) {
   app.route('/api/get-token/')
     .post(userController.getToken);
   app.route('/api/ping/')
-    .get(userController.getToken);
+    .get(userController.ping);
 };
