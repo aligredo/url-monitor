@@ -50,7 +50,8 @@ exports.register = function(req, res, next) {
                   if (err) {
                       return next(err);
                   } else {
-                      emailSender.sendEmail(user.email, 'Account Verification Token', 'Hello,\n\n' + 'Please verify your account by sending a PUT request as follows : \n API route: /api/verfiy-account/ \n with from-encode body: \n {token: "'+ newUser.verificationToken + '"}'+ '.\n' + 'Happy Monitoring!' + '\n')
+                      var base_url = `${req.protocol}://${req.get("host")}`;
+                      emailSender.sendEmail(user.email, 'Account Verification Token', 'Hello,\n\n' + 'Please verify your account by clicking the following link: \n' + base_url + '/api/verify-account-by-token/' + newUser.verificationToken +' \n \n Happy Monitoring!' + '\n')
                       console.log(user.verificationToken);
                               res.status(200).json({
                                   
@@ -65,7 +66,7 @@ exports.register = function(req, res, next) {
 
 exports.verify = function(req, res, next) {
 
-  var valid = req.body.token && typeof(req.body.token) === 'string';
+  var valid = req.params.token && typeof(req.params.token) === 'string';
 
     if (!valid) {
         return res.status(422).json({
@@ -76,7 +77,7 @@ exports.verify = function(req, res, next) {
         }
     
     User.findOne({
-			verificationToken: req.body.token
+			verificationToken: req.params.token
 		}).exec(function (err, user) {
 			    if (err) {
 				    return next(err);
