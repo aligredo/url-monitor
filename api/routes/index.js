@@ -1,6 +1,7 @@
 'use strict';
 module.exports = function(app) {
   var userController = require('../controllers/user.controller');
+  var authify = require('../middlewares/authify');
 
   // App Routes
   app.route('/api/create-account/')
@@ -8,7 +9,7 @@ module.exports = function(app) {
   app.route('/api/verify-account-by-token/:token')
     .get(userController.verify);
   app.route('/api/get-token/')
-    .post(userController.getToken);
+    .post(authify, userController.getToken);
   app.route('/api/ping/')
-    .get(userController.ping);
+    .get(authify, userController.ping);
 };

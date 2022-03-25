@@ -23,8 +23,6 @@ var urlencodedParser = bodyParser.urlencoded({ extended: true, limit: 1024 * 102
 app.use(jsonParser);
 app.use(urlencodedParser);
 
-// Middleware to authenticate and verify user requests using JWT in Authorization header
-app.use(auth);
 
 var routes = require('./api/routes/');
 routes(app);
