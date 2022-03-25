@@ -9,7 +9,7 @@ module.exports = function(app) {
   app.route('/api/verify-account-by-token/:token')
     .get(userController.verify);
   app.route('/api/get-token/')
-    .post(authify, userController.getToken);
-  app.route('/api/ping/')
-    .get(authify, userController.ping);
+    .post(userController.getToken);
+  app.route('/api/delete-account/')
+    .delete(authify, userController.deleteUser);
 };

@@ -140,13 +140,6 @@ exports.getToken = function(req, res, next) {
                 
             });
         }
-        if(!user.isVerified){
-            return res.status(400).json({
-                
-                message: "Account is not verified.",
-                
-            });
-        }
         return res.status(200).json({
             
             message: "Authenticated! Use the given token in Authorization header precedded with 'JWT' for subsequent requests.",
@@ -157,12 +150,27 @@ exports.getToken = function(req, res, next) {
 };
 
 
-exports.ping = function(req, res, next) {
-    return res.status(200).json({
-        
-        message: "Pong",
-        
-    });
-    
+exports.deleteUser = function(req, res, next) {
+    User.findOne({ _id: req.user._id })
+		.exec(function (err, user) {
+            if(!user){
+                return res.status(404).json({
+					    
+					message: "User not found.",
+					
+				});
+            }
+            else{
+                user.remove(function (err) {
+                    if (err) {
+                        return next(err);
+                    }
+
+                    res.status(202).json({
+                        msg: "Account was deleted successfully.",
+                    });
+                })
+            }
+        });
 }
     
