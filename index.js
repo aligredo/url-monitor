@@ -1,12 +1,13 @@
 require("./api/config/DBConnection");
+
 var express = require('express'),
   app = express(),
   port = process.env.PORT || 3001,
-  bodyParser = require("body-parser");
+  bodyParser = require("body-parser"),
+  auth = require('./api/middlewares/authify');
 
-var morgan = require('morgan'),
-jwt = require('jsonwebtoken'),
-SECRET  = require("./api/config").SECRET;
+var morgan = require('morgan');
+
 
 // Middleware To Log All Incoming Requests
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
@@ -22,19 +23,8 @@ var urlencodedParser = bodyParser.urlencoded({ extended: true, limit: 1024 * 102
 app.use(jsonParser);
 app.use(urlencodedParser);
 
-// Middleware to authenticate user requests using JWT in Authorization header
-app.use(function(req, res, next) {
-	if (req.headers && req.headers.authorization && req.headers.authorization.split(' ')[0] === 'JWT') {
-	  jwt.verify(req.headers.authorization.split(' ')[1], SECRET, function(err, decode) {
-		if (err) req.user = undefined;
-		req.user = decode;
-		next();
-	  });
-	} else {
-	  req.user = undefined;
-	  next();
-	}
-});
+// Middleware to authenticate and verify user requests using JWT in Authorization header
+app.use(auth);
 
 var routes = require('./api/routes/');
 routes(app);
@@ -42,14 +32,14 @@ routes(app);
   
 
 // Middleware to handle any (500 Internal server error) that may occur while doing database related functions
-app.use(function (err, req, res, next) {
+/*app.use(function (err, req, res, next) {
 	if (err.statusCode === 404) return next();
 	res.status(500).json({
 		err: process.env.NODE_ENV === "production" ? null : err,
 		msg: "Something went wrong! We are very sorry.",
 		data: null
 	});
-});
+});*/
 
 /*
   Middleware to handle any (404 Not Found) error that may occur if the request didn't find

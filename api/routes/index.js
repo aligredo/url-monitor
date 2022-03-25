@@ -7,8 +7,6 @@ module.exports = function(app) {
     .post(userController.register);
   app.route('/api/verify-account-by-token/:token')
     .get(userController.verify);
-  /*app.route('/api/verify-account/')
-    .put(userController.verify);*/
   app.route('/api/get-token/')
     .post(userController.getToken);
   app.route('/api/ping/')

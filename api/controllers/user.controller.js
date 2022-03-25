@@ -158,14 +158,6 @@ exports.getToken = function(req, res, next) {
 
 
 exports.ping = function(req, res, next) {
-    if(!req.user){
-        return res.status(401).json({
-            
-            message: "Authentication failed. Invalid user or password.",
-            
-        });
-    }
-    console.log(req.user)
     return res.status(200).json({
         
         message: "Pong",
