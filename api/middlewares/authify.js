@@ -20,7 +20,7 @@ module.exports = function(req, res, next) {
 			}
 			else{
 				if(!user.isVerified){
-					return res.status(401).json({
+					return res.status(400).json({
 					    
 						message: "Account is not verified. Please verify your account to be able to use the API.",
 						
@@ -34,7 +34,10 @@ module.exports = function(req, res, next) {
 		
 	  });
 	} else {
-	  req.user = undefined;
-	  next();
+		return res.status(401).json({
+					    
+			message: "Unauthorized",
+			
+		});
 	}
 };
