@@ -1,7 +1,8 @@
 'use strict';
 
 var mongoose = require('mongoose'),
-    Schema = mongoose.Schema;
+    Schema = mongoose.Schema,
+    ReportSchema = require('./report.model');
 
 var AuthenticationSchema = new Schema({
     username: {
@@ -15,7 +16,7 @@ var AuthenticationSchema = new Schema({
 });
 
 var AssertSchema = new Schema({
-    username: {
+    statusCode: {
         type: Number,
         required: true
     }
@@ -71,8 +72,8 @@ var UrlCheckSchema = new Schema({
         type: String,
         required: true
     },
-    logs: {
-        type: String,
+    report: {
+        type: ReportSchema,
         required: true
     }
 
