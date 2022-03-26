@@ -46,3 +46,5 @@ mongoose.connect(dburl, { useNewUrlParser: true, useUnifiedTopology: true } , fu
 });
 
 require("../models/user.model");
+require("../models/urlcheck.model");
+require("../models/report.model");

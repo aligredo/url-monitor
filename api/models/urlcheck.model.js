@@ -56,8 +56,7 @@ var UrlCheckSchema = new Schema({
     },
     authentication: AuthenticationSchema,
     httpHeaders: {
-        type: Map,
-        of: String
+        type: String
     },
     assert: AssertSchema,
     tags: {

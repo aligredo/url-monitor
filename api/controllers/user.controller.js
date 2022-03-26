@@ -1,9 +1,8 @@
 'use strict';
 
-const req = require('express/lib/request');
-const { send } = require('process');
 
 var mongoose = require('mongoose'),
+  UrlCheck = mongoose.model('UrlCheck'),
   jwt = require('jsonwebtoken'),
   bcrypt = require('bcrypt'),
   jwt = require('jsonwebtoken'),
@@ -22,7 +21,7 @@ exports.register = function(req, res, next) {
     if (!valid) {
         return res.status(422).json({
             
-            message: "email [String, Valid email], password [String, Length between 8 and 25 characters] are required fields.",
+            message: "email [String, Valid email], password [String, Length between 8 and 25 characters] are required fields."
             
             });
         }
@@ -168,11 +167,14 @@ exports.deleteUser = function(req, res, next) {
 				});
             }
             else{
+                UrlCheck.remove({owner: user._id}).exec(function(err){
+                    if(err)
+                        return next(err);
+                })
                 user.remove(function (err) {
                     if (err) {
                         return next(err);
                     }
-
                     res.status(202).json({
                         msg: "Account was deleted successfully.",
                     });
