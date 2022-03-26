@@ -140,6 +140,13 @@ exports.getToken = function(req, res, next) {
                 
             });
         }
+        if(!user.isVerified){
+            return res.status(400).json({
+                
+                message: "Account is not verified. Please verify your account to be able to use the API.",
+                
+            });
+        }
         return res.status(200).json({
             
             message: "Authenticated! Use the given token in Authorization header precedded with 'JWT' for subsequent requests.",
