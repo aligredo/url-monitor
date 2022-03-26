@@ -1,8 +1,9 @@
 'use strict';
 module.exports = function(app) {
-  var userController = require('../controllers/user.controller');
-  var urlcheckController = require('../controllers/urlcheck.controller');
-  var authify = require('../middlewares/authify');
+  var userController = require('../controllers/user.controller'),
+      urlcheckController = require('../controllers/urlcheck.controller'),
+      reportController = require('../controllers/report.controller'),
+      authify = require('../middlewares/authify');
 
   // User Routes
   app.route('/api/create-account/')
@@ -29,5 +30,12 @@ module.exports = function(app) {
     .delete(authify, urlcheckController.deleteByName);
   app.route('/api/update-urlcheck-by-name/:name')
     .put(authify, urlcheckController.UpdateByName);
-  
+
+  // Report Routes
+  app.route('/api/get-report-by-urlcheck-id/:_id')
+    .get(authify, reportController.getByUrlCheckId);
+  app.route('/api/get-report-by-urlcheck-name/:name')
+    .get(authify, reportController.getByUrlCheckName);
+  app.route('/api/get-reports-by-tag/:tag')
+    .get(authify, reportController.getByTag);
 };
