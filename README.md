@@ -1,26 +1,29 @@
-# :bar_chart: url-monitor
+# :bar_chart: url-monitor.
 ----
 A RESTful API server that allows authenticated users to monitor URLs, and get detailed uptime reports about their availability, average response time, and total uptime/downtime.
 ----
-
-## Installation
+## :house: To Run It Locally
 ----
-Use the package manager [npm](https://www.npmjs.com/) to install url-monitor project.
-
+First: Set your environment values or populate it in `./api/config/index.js` file.
 ```bash
 npm install
 ```
-
-## To Run It Locally
-----
-First: start mongo,
+Then: start mongo.
 ```bash
 mongo
 ```
-Then: run the url-monitor app.
+Finally: run the url-monitor app.
 ```bash
 npm start
 ```
+
+## :whale: To Run It With Docker
+----
+First: Set your environment in `./.env` file.
+Then:
+```bash
+docker-compose up
+``` 
 ## API Documentaion 
 ----
 ###  User
