@@ -212,6 +212,29 @@ exports.getById = function(req, res, next) {
     });
 };
 
+exports.getAllUrlChecksByUser = function(req, res, next) {
+    UrlCheck.findOne({owner: req.user._id}).exec(function(err, urlchecks){
+        if(err)
+            return next(err);
+        if(!urlchecks){
+            return res.status(404).json({
+            
+                message: "No UrlChecks was found in your account."
+                
+            });
+        }
+            
+        return res.status(200).json({
+            
+            message: "Your Urlchecks were retrieved successfully.",
+            data: urlchecks
+            
+        });
+
+    });
+};
+
+
 exports.getByName = function(req, res, next) {
     var valid = req.params.name && typeof req.params.name === 'string'
     if(!valid){

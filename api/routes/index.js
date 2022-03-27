@@ -30,6 +30,8 @@ module.exports = function(app) {
     .delete(authify, urlcheckController.deleteByName);
   app.route('/api/update-urlcheck-by-name/:name')
     .put(authify, urlcheckController.UpdateByName);
+  app.route('/api/get-urlchecks/')
+    .get(authify, urlcheckController.getAllUrlChecksByUser);
 
   // Report Routes
   app.route('/api/get-report-by-urlcheck-id/:_id')
