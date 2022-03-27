@@ -1,11 +1,20 @@
 'use strict';
 
+const { Headers } = require('node-fetch');
+
+
 
 
 var mongoose = require('mongoose'),
   UrlCheck = mongoose.model('UrlCheck'),
+  User = mongoose.model('User'),
   URL_REGEX = require("../config/").URL_REGEX,
+  emailSender = require("../utils/emailSender"),
+  webhookpush = require("../utils/webhookpush"),
   isJSON = require('../utils/isJSON'),
+  fetch = require('node-fetch'),
+  http = require('http'),
+  https = require('https'),
   moment = require('moment');
 
 exports.create = function(req, res, next) {
@@ -48,7 +57,7 @@ exports.create = function(req, res, next) {
             if(!typeof(req.body.webhook) === 'string' && URL_REGEX.test(req.body.webhook)){
                 return res.status(422).json({
             
-                    message: "optional field webhhook should be of type (String) and is valid url format."
+                    message: "optional field webhook should be of type (String) and is valid url format."
                     
                 });
             }
@@ -67,10 +76,10 @@ exports.create = function(req, res, next) {
         }
 
         if(req.body.interval){
-            if(!typeof(req.body.interval) === 'number'){
+            if(!typeof(req.body.interval) === 'number' && !(req.body.interval > 0 && req.body.interval < 61)){
                 return res.status(422).json({
             
-                    message: "optional field interval should be of type (number) in seconds."
+                    message: "optional field interval should be of type (number) in range [1-60] minutes."
                     
                 });
             }
@@ -150,7 +159,7 @@ exports.create = function(req, res, next) {
             downtime: 0,
             uptime: 0,
             responseTime: 0,
-            history:  moment().format('MMMM Do YYYY, h:mm:ss a') + '    ::::> Not Monitored Yet.'
+            history:  moment().format('MMMM Do YYYY, h:mm:ss a') + ' urlcheck added ::::> Not Monitored Yet.\n' 
         }
         urlcheck.ignoreSSL = (req.body.ignoreSSL === 'true');
 
@@ -393,7 +402,7 @@ exports.UpdateById = function(req, res, next) {
             if(!typeof(req.body.webhook) === 'string' && URL_REGEX.test(req.body.webhook)){
                 return res.status(422).json({
             
-                    message: "optional field webhhook should be of type (String) and is valid url format."
+                    message: "optional field webhook should be of type (String) and is valid url format."
                     
                 });
             }
@@ -412,10 +421,10 @@ exports.UpdateById = function(req, res, next) {
         }
 
         if(req.body.interval){
-            if(!typeof(req.body.interval) === 'number'){
+            if(!typeof(req.body.interval) === 'number' && !(req.body.interval > 0 && req.body.interval < 61)){
                 return res.status(422).json({
             
-                    message: "optional field interval should be of type (number) in seconds."
+                    message: "optional field interval should be of type (number) in range [1-60] minutes."
                     
                 });
             }
@@ -493,8 +502,7 @@ exports.UpdateById = function(req, res, next) {
                     return next(err);
 
                 return res.status(200).json({
-                    message: "UrlCheck: "+ updatedUrlCheck.name + " was updated successfully.",
-                    data: updatedUrlCheck
+                    message: "UrlCheck: "+ updatedUrlCheck.name + " was updated successfully."
                 });        
                 
             }
@@ -594,7 +602,7 @@ exports.UpdateByName = function(req, res, next) {
             if(!typeof(req.body.webhook) === 'string' && URL_REGEX.test(req.body.webhook)){
                 return res.status(422).json({
             
-                    message: "optional field webhhook should be of type (String) and is valid url format."
+                    message: "optional field webhook should be of type (String) and is valid url format."
                     
                 });
             }
@@ -613,10 +621,10 @@ exports.UpdateByName = function(req, res, next) {
         }
 
         if(req.body.interval){
-            if(!typeof(req.body.interval) === 'number'){
+            if(!typeof(req.body.interval) === 'number' && !(req.body.interval > 0 && req.body.interval < 61)){
                 return res.status(422).json({
             
-                    message: "optional field interval should be of type (number) in seconds."
+                    message: "optional field interval should be of type (number) in range [1-60] minutes."
                     
                 });
             }
@@ -694,11 +702,116 @@ exports.UpdateByName = function(req, res, next) {
                     return next(err);
 
                 return res.status(200).json({
-                    message: "UrlCheck: "+ updatedUrlCheck.name + " was updated successfully.",
-                    data: updatedUrlCheck
+                    message: "UrlCheck: "+ updatedUrlCheck.name + " was updated successfully."
                 });        
                 
             }
         );   
+    });
+};
+
+exports.runCheckByInterval = function(interval){
+    UrlCheck.find({interval: interval}).exec(function(err, urlchecks){
+        urlchecks.forEach(urlcheck => {
+            sendPollRequest(urlcheck).then(result =>  writeInReport(urlcheck, result));
+        });
+    })
+}; 
+
+var sendPollRequest = async function(urlcheck){
+    
+    const AbortController = globalThis.AbortController || await import('abort-controller');
+
+    const httpAgent = new http.Agent({ keepAlive: true });
+    const httpsAgent = new https.Agent({ keepAlive: true, rejectUnauthorized: !urlcheck.ignoreSSL});
+    const agent = urlcheck.protocol == 'HTTP' ? httpAgent : httpsAgent;    
+   
+
+    var url = '';
+    if(urlcheck.protocol == 'HTTP' || urlcheck.protocol == 'HTTPS'){
+        url += (urlcheck.protocol.toLowerCase() + '://');
+    }
+    url += urlcheck.url;
+    if(urlcheck.port){
+        url += `:${urlcheck.port}`
+    }
+    if(urlcheck.path){
+        url += `/${urlcheck.path}`
+    }
+
+    var headers = {};
+    if(urlcheck.httpHeaders){
+        headers = JSON.stringify(urlcheck.httpHeaders)
+    }
+    if(urlcheck.authentication){
+        headers['Authorization'] = `Basic ${urlcheck.authentication.username}:${urlcheck.authentication.password}`
+    }
+
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => {
+        controller.abort();
+    }, urlcheck.timeout * 1000);
+    
+    try {
+        let startTime = performance.now();
+        var statusCode = await fetch(url,
+            {  
+                signal: controller.signal,
+                Headers: new Headers(headers),
+                agent
+            }).then(res => {return res.status});
+        let endTime = performance.now();
+        return {time: moment().format('MMMM Do YYYY, h:mm:ss a'), statusCode: statusCode, timeout: false, responseTime: Math.ceil(endTime - startTime)};
+    
+    } catch (error) {
+        return {time: moment().format('MMMM Do YYYY, h:mm:ss a'), statusCode: statusCode, timeout: true};
+    } finally {
+        clearTimeout(timeout);
+    }    
+   
+};
+
+var writeInReport = function(urlcheck, result){
+    UrlCheck.findOne({_id: urlcheck._id}).exec(function(err, urlchecktobeupdated){
+        if(!result.timeout){
+            if((urlchecktobeupdated.assert && urlchecktobeupdated.assert.statusCode == result.statusCode) || result.statusCode == 200){
+                urlchecktobeupdated.report.status = 'UP';
+                urlchecktobeupdated.report.uptime += 60;
+                urlchecktobeupdated.report.history += `=> Successfull poll on ${result.time}.`;
+                urlchecktobeupdated.report.history += '\n'
+                urlchecktobeupdated.report.responseTime = Math.ceil(((urlchecktobeupdated.report.responseTime * (urlchecktobeupdated.report.history.split('=>').length)) + result.responseTime) / (urlchecktobeupdated.report.history.split('=>').length + 1)); 
+            }
+            else{
+                urlchecktobeupdated.report.status = 'DOWN';
+                urlchecktobeupdated.report.downtime += 60;
+                urlchecktobeupdated.report.outages += 1;
+                urlchecktobeupdated.report.history += `!> Unsuccessful poll on ${result.time} response status code: ${result.statusCode}.`;
+                urlchecktobeupdated.report.history += '\n'
+
+            }
+        }
+        else{
+            urlchecktobeupdated.report.status = 'DOWN';
+            urlchecktobeupdated.report.downtime += 60;
+            urlchecktobeupdated.report.outages += 1;
+            urlchecktobeupdated.report.history += `!> Unsuccessful poll on ${result.time} request timed out.`;
+            urlchecktobeupdated.report.history += '\n'
+        }
+
+        urlchecktobeupdated.report.availability =  ((urlchecktobeupdated.report.uptime) / (urlchecktobeupdated.report.downtime +  urlchecktobeupdated.report.uptime) * 100 + '%');        
+        UrlCheck.findOneAndUpdate({_id: urlcheck._id},
+			urlchecktobeupdated, function (err, updatedUrlCheck) {});   
+       
+        if((urlcheck.report.status != urlchecktobeupdated.report.status && urlchecktobeupdated.report.outages % urlcheck.threshold == 0) || 
+        (urlcheck.report.status == 'DOWN' && urlchecktobeupdated.report.status == 'UP')){
+            User.findOne({_id: urlcheck.owner}).exec(function(err, user){
+                emailSender.sendEmail(user.email, `UrlCheck: ${urlcheck.name} is ${urlchecktobeupdated.report.status}`,
+                `Hello!\n your urlcheck: ${urlcheck.name} is currently ${urlchecktobeupdated.report.status}.\n Bye!`);
+            });
+            if(urlcheck.webhook){
+                webhookpush.pushNotification(urlcheck.webhook, `UrlCheck: ${urlcheck.name} is ${urlchecktobeupdated.report.status}`)
+            }
+        }
     });
 };

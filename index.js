@@ -8,7 +8,7 @@ var express = require('express'),
 
 var morgan = require('morgan');
 
-
+require('./api/utils/scheduled');
 // Middleware To Log All Incoming Requests
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 

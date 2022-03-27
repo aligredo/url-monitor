@@ -83,10 +83,14 @@ exports.getByTag = function(req, res, next) {
                 
             });
         }
-        var returnedData = '';
+        var returnedData = {};
         for (let index = 0; index < urlchecks.length; index++) {
+            returnedData += urlchecks[i].name + ": "
             returnedData = returnedData.concat(JSON.parse(JSON.stringify(urlchecks[i])));
             returnedData += '\n';
+            returnedData += '-------------------------------------------------------';
+            returnedData += '\n';
+
         }
         var returnedData = JSON.parse(JSON.stringify(urlchecks));
         return res.status(200).json({

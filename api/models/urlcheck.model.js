@@ -48,7 +48,7 @@ var UrlCheckSchema = new Schema({
     },
     interval: {
         type: Number,
-        default: 600
+        default: 10
     },
     threshold: {
         type: Number,
