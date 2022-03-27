@@ -44,7 +44,7 @@ verifies the user account.
       - `token`: verification token sent to user's email.
 
 #### - [/api/user/get-token/]()
-gets the token that authenticate the user for the subsequent requests.
+creates a user authentication token and retrun it so it could be used to authenticate the user for the subsequent requests.
 * **Method:**
   `POST`
   *  **Body**
