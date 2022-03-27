@@ -11,7 +11,7 @@ module.exports = function(app) {
   app.route('/api/user/verify-account-by-token/:token')
     .get(userController.verify);
   app.route('/api/user/get-token/')
-    .post(userController.getToken);
+    .get(userController.getToken);
   app.route('/api/user/delete-account/')
     .delete(authify, userController.deleteUser);
     
