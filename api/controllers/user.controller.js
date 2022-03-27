@@ -50,7 +50,7 @@ exports.register = function(req, res, next) {
                       return next(err);
                   } else {
                       var base_url = `${req.protocol}://${req.get("host")}`;
-                      emailSender.sendEmail(user.email, 'Account Verification Token', 'Hello,\n\n' + 'Please verify your account by clicking the following link: \n' + base_url + '/api/verify-account-by-token/' + newUser.verificationToken +' \n \n Happy Monitoring!' + '\n')
+                      emailSender.sendEmail(user.email, 'Account Verification Token', 'Hello,\n\n' + 'Please verify your account by clicking the following link: \n' + base_url + '/api/user/verify-account-by-token/' + newUser.verificationToken +' \n \n Happy Monitoring!' + '\n')
                               res.status(200).json({
                                   
                                   message: 'User account has been created succesfully. A verification email has been sent to ' + newUser.email + '.',
