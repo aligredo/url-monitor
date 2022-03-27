@@ -43,7 +43,10 @@ verifies the user account.
 #### - [/api/user/get-token/]()
 gets the token that authenticate the user for the subsequent requests.
 * **Method:**
-  `GET`
+  `POST`
+  *  **Body**
+      - `email`: user email.
+      - `password`: user password.
   
 #### - [/api/user/delete-account/]()
 deletes the user account.
