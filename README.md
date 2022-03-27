@@ -21,12 +21,6 @@ Then: run the url-monitor app.
 ```bash
 npm start
 ```
-## :whale: To Run It With Docker
-----
-```bash
-docker-compose up
-```
-
 ## API Documentaion 
 ----
 ###  User
