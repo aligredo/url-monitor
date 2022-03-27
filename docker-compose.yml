@@ -1,0 +1,31 @@
+version: "3.8"
+services:
+  mongodb:
+    image: mongo:5.0.2
+    restart: unless-stopped
+    env_file: ./.env
+    ports:
+      - $MONGODB_LOCAL_PORT:$MONGODB_DOCKER_PORT
+    volumes:
+      - db:/data/db
+  app:
+    depends_on:
+      - mongodb
+    build: ./
+    restart: unless-stopped
+    env_file: ./.env
+    ports:
+      - $NODE_LOCAL_PORT:$NODE_DOCKER_PORT
+    environment:
+      - SECRET=$SECRET
+      - EMAIL_HOST=$EMAIL_HOST
+      - SENDER_EMAIL=$SENDER_EMAIL
+      - EMAIL_PORT=$EMAIL_PORT
+      - SENDGRID_USERNAME=$SENDGRID_USERNAME
+      - SENDGRID_PASSWORD=$SENDGRID_PASSWORD
+      - MONGO_URI=$MONGO_URI
+      - DB_PORT=$MONGODB_DOCKER_PORT
+    stdin_open: true
+    tty: true
+volumes:
+  db:
