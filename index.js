@@ -30,14 +30,14 @@ routes(app);
   
 
 // Middleware to handle any (500 Internal server error) that may occur while doing database related functions
-/*app.use(function (err, req, res, next) {
+app.use(function (err, req, res, next) {
 	if (err.statusCode === 404) return next();
 	res.status(500).json({
 		err: process.env.NODE_ENV === "production" ? null : err,
 		msg: "Something went wrong! We are very sorry.",
 		data: null
 	});
-});*/
+});
 
 /*
   Middleware to handle any (404 Not Found) error that may occur if the request didn't find
