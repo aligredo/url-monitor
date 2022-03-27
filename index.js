@@ -2,7 +2,7 @@ require("./api/config/DBConnection");
 
 var express = require('express'),
   app = express(),
-  port = process.env.PORT || 3001,
+  port = process.env.PORT || 3000,
   bodyParser = require("body-parser"),
   auth = require('./api/middlewares/authify');
 
