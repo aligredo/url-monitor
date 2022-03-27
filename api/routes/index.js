@@ -22,7 +22,7 @@ module.exports = function(app) {
     .get(authify, urlcheckController.getById);
   app.route('/api/urlcheck/delete-urlcheck-by-id/:_id')
     .delete(authify, urlcheckController.deleteById);
-  app.route('/api//urlcheckupdate-urlcheck-by-id/:_id')
+  app.route('/api/urlcheck/update-urlcheck-by-id/:_id')
     .put(authify, urlcheckController.UpdateById);
   app.route('/api/urlcheck/get-urlcheck-by-name/:name')
     .get(authify, urlcheckController.getByName);
